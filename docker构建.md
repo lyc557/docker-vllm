@@ -25,6 +25,8 @@
 
 
 ```bash
+export HTTP_PROXY=http://192.168.31.120:9666
+export HTTPS_PROXY=http://192.168.31.120:9666
 docker build -t vllm-env .
 ```
  

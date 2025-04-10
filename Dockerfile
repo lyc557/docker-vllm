@@ -1,26 +1,31 @@
-# 基于 NVIDIA CUDA 镜像（假设你要运行 PyTorch 和 vLLM）
-FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+ARG IMAGE_NAME=nvidia/cuda
+FROM ${IMAGE_NAME}:12.8.1-devel-rockylinux9 AS base
 
-# 安装系统依赖
-RUN apt-get update && apt-get install -y \
-    python3-pip \
-    git \
-    curl \
-    vim \
-    wget \
-    && rm -rf /var/lib/apt/lists/*
+ENV PKG_CMD=yum
 
-# 设置工作目录
-WORKDIR /workspace
+FROM base AS base-amd64
 
-# 安装 PyTorch（使用 CUDA 12.1 版本）
-RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+ENV NV_CUDNN_VERSION=9.8.0.87-1
+ENV NV_CUDNN_PACKAGE=libcudnn9-cuda-12-${NV_CUDNN_VERSION}
+ENV NV_CUDNN_PACKAGE_DEV=libcudnn9-devel-cuda-12-${NV_CUDNN_VERSION}
 
-# 安装 vLLM 和 transformers
-RUN pip3 install vllm transformers accelerate sentencepiece
+FROM base AS base-arm64
 
-# 复制本地代码到容器
-COPY . /workspace
+ENV NV_CUDNN_VERSION=9.8.0.87-1
+ENV NV_CUDNN_PACKAGE=libcudnn9-cuda-12-${NV_CUDNN_VERSION}
+ENV NV_CUDNN_PACKAGE_DEV=libcudnn9-devel-cuda-12-${NV_CUDNN_VERSION}
 
-# 设置默认命令为启动 bash
-CMD ["bash"]
+
+FROM base-${TARGETARCH}
+
+ARG TARGETARCH
+
+LABEL maintainer="NVIDIA CORPORATION <sw-cuda-installer@nvidia.com>"
+
+LABEL com.nvidia.cudnn.version="${NV_CUDNN_VERSION}"
+
+RUN ${PKG_CMD} install -y \
+    ${NV_CUDNN_PACKAGE} \
+    ${NV_CUDNN_PACKAGE_DEV} \
+    && ${PKG_CMD} clean all \
+    && rm -rf /var/cache/yum/*
