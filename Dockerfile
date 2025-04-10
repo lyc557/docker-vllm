@@ -1,31 +1,33 @@
-ARG IMAGE_NAME=nvidia/cuda
-FROM ${IMAGE_NAME}:12.8.1-devel-rockylinux9 AS base
+FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
 
-ENV PKG_CMD=yum
+# 安装系统依赖
+RUN apt-get update && apt-get install -y \
+    wget \
+    git \
+    curl \
+    vim \
+    && rm -rf /var/lib/apt/lists/*
 
-FROM base AS base-amd64
+# 安装 Miniconda
+RUN wget https://repo.anaconda.com/miniconda/Miniconda3-latest-Linux-x86_64.sh -O /tmp/miniconda.sh && \
+    bash /tmp/miniconda.sh -b -p /opt/conda && \
+    rm /tmp/miniconda.sh
 
-ENV NV_CUDNN_VERSION=9.8.0.87-1
-ENV NV_CUDNN_PACKAGE=libcudnn9-cuda-12-${NV_CUDNN_VERSION}
-ENV NV_CUDNN_PACKAGE_DEV=libcudnn9-devel-cuda-12-${NV_CUDNN_VERSION}
+# 设置环境变量
+ENV PATH="/opt/conda/bin:${PATH}"
 
-FROM base AS base-arm64
+# 创建并激活环境
+RUN conda create -n vllm python=3.10 -y
+SHELL ["conda", "run", "-n", "vllm", "/bin/bash", "-c"]
 
-ENV NV_CUDNN_VERSION=9.8.0.87-1
-ENV NV_CUDNN_PACKAGE=libcudnn9-cuda-12-${NV_CUDNN_VERSION}
-ENV NV_CUDNN_PACKAGE_DEV=libcudnn9-devel-cuda-12-${NV_CUDNN_VERSION}
+# 安装 PyTorch
+RUN conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia -y
 
+# 安装 vLLM 和其他依赖
+RUN conda install -c conda-forge transformers accelerate sentencepiece -y
+RUN pip install vllm
 
-FROM base-${TARGETARCH}
+WORKDIR /workspace
 
-ARG TARGETARCH
-
-LABEL maintainer="NVIDIA CORPORATION <sw-cuda-installer@nvidia.com>"
-
-LABEL com.nvidia.cudnn.version="${NV_CUDNN_VERSION}"
-
-RUN ${PKG_CMD} install -y \
-    ${NV_CUDNN_PACKAGE} \
-    ${NV_CUDNN_PACKAGE_DEV} \
-    && ${PKG_CMD} clean all \
-    && rm -rf /var/cache/yum/*
+# 设置默认命令
+CMD ["conda", "run", "--no-capture-output", "-n", "vllm", "bash"]
