@@ -1,0 +1,16 @@
+[root@ds-test docker-vllm]# docker build -t vllm-env .
+[+] Building 60.3s (2/2) FINISHED                                    docker:default
+ => [internal] load build definition from Dockerfile                           0.0s
+ => => transferring dockerfile: 950B                                           0.0s
+ => ERROR [internal] load metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-r  60.3s
+------
+ > [internal] load metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04:
+------
+Dockerfile:1
+--------------------
+   1 | >>> FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+   2 |
+   3 |     # 安装系统依赖
+--------------------
+ERROR: failed to solve: nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: failed to resolve source metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: not found
+
