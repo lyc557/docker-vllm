@@ -13,4 +13,20 @@ Dockerfile:1
    3 |     # 安装系统依赖
 --------------------
 ERROR: failed to solve: nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: failed to resolve source metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: not found
+[root@rocky docker-vllm]# docker build -t vllm-env .
+[+] Building 30.1s (2/2) FINISHED                                docker:default
+ => [internal] load build definition from Dockerfile                       0.0s
+ => => transferring dockerfile: 1.01kB                                     0.0s
+ => ERROR [internal] load metadata for docker.io/nvidia/cuda:12.1.0-cudn  30.0s
+------
+ > [internal] load metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04:
+------
+WARNING: current commit information was not captured by the build: failed to read current commit information with git rev-parse --is-inside-work-tree
+Dockerfile:1
+--------------------
+   1 | >>> FROM nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04
+   2 |     
+   3 |     # 安装系统依赖
+--------------------
+ERROR: failed to solve: DeadlineExceeded: DeadlineExceeded: DeadlineExceeded: nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: failed to resolve source metadata for docker.io/nvidia/cuda:12.1.0-cudnn8-runtime-ubuntu22.04: failed to do request: Head "https://registry-1.docker.io/v2/nvidia/cuda/manifests/12.1.0-cudnn8-runtime-ubuntu22.04": dial tcp 103.200.31.172:443: i/o timeout
 
